@@ -130,24 +130,30 @@ def BFS(sp, ep, ary, mode):
 
     # BFS Loop
     visitno = 2  # Starting from the 2nd visit time for subsequent visits
+    destination_found = False  # Flag to track if the destination has been found
 
     while fringe:
         curr_child = fringe.pop(0)  # Get the first child from the fringe
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
 
-        # Check if we've found the destination node in the children
-        if (curr_child.pr, curr_child.pc) == (ep[1] - 1, ep[0] - 1):
-            # Set both first and last visit for the destination node immediately when it's found
-            visited[curr_child.pr, curr_child.pc, 1] = visitno  # First visit time
-            visited[curr_child.pr, curr_child.pc, 2] = visitno  # Last visit time
-            solution = True
-            # Backtrack to find the full path
-            while curr_child:
-                path.append((int(curr_child.pr), int(curr_child.pc)))  # Convert to Python int
-                moveMap[curr_child.pr, curr_child.pc] = "*"
-                curr_child = curr_child.parent
-            path.reverse()  # Reverse the path to get it from start to end
-            break  # Immediately stop further exploration after finding the destination
+        # If we've reached the end point, backtrack the path
+        for i in range(len(currNode.children)):
+            child = currNode.children[i]
+            if (child.pr, child.pc) == (ep[1] - 1, ep[0] - 1):
+                solution = True
+                if not destination_found:
+                    # Mark both first and last visit times the same for the destination node
+                    visited[child.pr, child.pc, 1] = visitno  # First visit time
+                    visited[child.pr, child.pc, 2] = visitno  # Last visit time
+                    destination_found = True  # Prevent further updates to the destination
+                    moveMap[child.pr, child.pc] = "*"
+                # Backtrack to find the full path
+                while curr_child:
+                    path.append((int(curr_child.pr), int(curr_child.pc)))  # Convert to Python int
+                    moveMap[curr_child.pr, curr_child.pc] = "*"
+                    curr_child = curr_child.parent
+                path.reverse()  # Reverse the path to get it from start to end
+                break  # Immediately stop further exploration after finding the destination
 
         # Append children to fringe
         for child in currNode.children:
@@ -165,6 +171,15 @@ def BFS(sp, ep, ary, mode):
 
                 visitno += 1  # Increment visit time
 
+        # Break if we already found the solution
+        if solution:
+            break
+
+    # Ensure last visit for destination is set to correct time (if not already updated)
+    if visited[ep[1] - 1, ep[0] - 1, 2] != visitno - 1:
+        visited[ep[1] - 1, ep[0] - 1, 2] = visitno - 1
+
+    # Output results
     if mode == "release":
         if solution:
             printMap(moveMap)
