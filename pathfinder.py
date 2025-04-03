@@ -261,7 +261,10 @@ if __name__ == "__main__":
         sys.exit("Error: 'algorithm' variable incorrect")
 
     # HEURISTIC specifies the heuristic to use for the A* search, with the possible values of euclidean and manhattan. This input is ignored for BFS and UCS.
-    heuristic = sys.argv[4]
+    try:
+        heuristic = sys.argv[4]
+    except:
+        None
 
     if heuristic != 'euclidean' and heuristic != 'manhattan' and algorithm == 'astar':
         sys.exit("Error: 'heuristic' variable incorrect")
