@@ -110,7 +110,6 @@ def appendChildren(appendee, children_list):
 
 # BFS Algorithm
 def BFS(sp, ep, ary, mode):
-    # BFS expand breadth first
     start_node = Node(True, sp[1] - 1, sp[0] - 1, ary)  # starting from (startX, startY)
     moveMap = np.array(ary)
     moveMap[start_node.pr, start_node.pc] = "*"  # Mark the start on the map
@@ -119,7 +118,7 @@ def BFS(sp, ep, ary, mode):
     fringe = []
     fringe.append(Child(True, start_node.pr, start_node.pc, ary, parent=None))
 
-    # Initialize a 3D visited matrix (height x width x 3), the 3 channels:S
+    # Initialize a 3D visited matrix (height x width x 3), the 3 channels:
     # 0: visit count, 1: first visited, 2: last visited
     visited = np.zeros((np.size(ary, 0), np.size(ary, 1), 3), dtype=int)  # Initialize all as 0
     visited[start_node.pr, start_node.pc, 0] = 1  # The start node is visited once
@@ -130,14 +129,17 @@ def BFS(sp, ep, ary, mode):
     path = []
 
     # BFS Loop
-    visitno = 2
+    visitno = 2  # Starting from the 2nd visit time for subsequent visits
 
     while fringe:
         curr_child = fringe.pop(0)  # Get the first child from the fringe
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
 
-        # If we've reached the end point, backtrack the path
-        if (currNode.pr, currNode.pc) == (ep[1] - 1, ep[0] - 1):
+        # Check if we've found the destination node in the children
+        if (curr_child.pr, curr_child.pc) == (ep[1] - 1, ep[0] - 1):
+            # Set both first and last visit for the destination node immediately when it's found
+            visited[curr_child.pr, curr_child.pc, 1] = visitno  # First visit time
+            visited[curr_child.pr, curr_child.pc, 2] = visitno  # Last visit time
             solution = True
             # Backtrack to find the full path
             while curr_child:
@@ -145,7 +147,7 @@ def BFS(sp, ep, ary, mode):
                 moveMap[curr_child.pr, curr_child.pc] = "*"
                 curr_child = curr_child.parent
             path.reverse()  # Reverse the path to get it from start to end
-            break
+            break  # Immediately stop further exploration after finding the destination
 
         # Append children to fringe
         for child in currNode.children:
@@ -162,8 +164,7 @@ def BFS(sp, ep, ary, mode):
                     visited[child.pr, child.pc, 2] = visitno  # Last visit time
 
                 visitno += 1  # Increment visit time
-    
-    
+
     if mode == "release":
         if solution:
             printMap(moveMap)
