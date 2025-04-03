@@ -228,8 +228,6 @@ if __name__ == "__main__":
     map = sys.argv[2]
 
     # check input for "MAP" is  text file
-    if map.endswith(".txt") == False:
-        sys.exit("Error: 'map' variable incorrect (must be path to text file)")
 
     # read map file and store variables
     try:
