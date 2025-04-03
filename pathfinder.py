@@ -110,6 +110,9 @@ def appendChildren(appendee, children_list):
 
 # BFS Algorithm
 def BFS(sp, ep, ary, mode):
+    sp[:] = sp[::-1]
+    ep[:] = ep[::-1]
+
     start_node = Node(True, sp[1] - 1, sp[0] - 1, ary)  # starting from (startX, startY)
     moveMap = np.array(ary)
     moveMap[start_node.pr, start_node.pc] = "*"  # Mark the start on the map
