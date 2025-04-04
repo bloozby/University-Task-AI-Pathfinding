@@ -101,6 +101,8 @@ class Child:
             self.value = map[pr, pc]
             self.cumcost = 0
             self.direction_tuple = None
+            self.G = 0
+            self.H = 0
         else:
             self.pr = len(map)+10
             self.pc = len(map)+10
@@ -119,6 +121,9 @@ class Child:
     
     def cumulate(self, costs, totalcost):
         self.cumcost = totalcost + costs
+
+    def gh(self, ep):
+        self.G = manhattan(self.pr, self.pc, ep.pr, ep.pc)
         
 
 class Node:
@@ -128,12 +133,22 @@ class Node:
         self.pc = pc
         self.value = map[pr, pc]
         self.children = findChildren(pr, pc, map)
+        self.G = 0
+        self.H = 0
+        self.parent=None
 
         if self.value == "X":
             self.obstacle = True
 
     def __repr__(self):
         return f"Node(pr={self.pr}, pc={self.pc}, value={self.value}, children={self.children})"
+    
+    def __lt__(self, other):
+        # For comparison based on the f value (G + H)
+        return (self.G + self.H) < (other.G + other.H)
+    
+    def gh(self, ep):
+        G = manhattan(self.pr, self.pc, ep.pr, ep.pc)
     
 def appendChildren(appendee, children_list):
     appending = True
@@ -322,24 +337,22 @@ def UCS(sp, ep, ary, mode):
 
 #A*
 
-def manhattan_heuristic(pr, pc, ep):
+def manhattan(pr, pc, er, ec):
     """Calculate the Manhattan Distance heuristic from (pr, pc) to the end point (ep)."""
-    return abs(pr - ep[1]) + abs(pc - ep[0])
+    return abs(pr - er) + abs(pc - ec)
 
 def A_star(sp, ep, ary, mode):
     sp[:] = sp[::-1]
     ep[:] = ep[::-1]
 
     start_node = Node(True, sp[1] - 1, sp[0] - 1, ary)  # starting from (startX, startY)
+    end_node = Node(True, sp[1] - 1, sp[0] - 1, ary)
     moveMap = np.array(ary)
     moveMap[start_node.pr, start_node.pc] = "*"  # Mark the start on the map
 
     # Initialize the fringe with the start node
     fringe = []
-    g_start = 0  # g(n) = 0 for start node
-    h_start = manhattan_heuristic(start_node.pr, start_node.pc, ep)  # h(n) for the start node
-    f_start = g_start + h_start  # f(n) = g(n) + h(n)
-    heapq.heappush(fringe, (f_start, g_start, start_node.pr, start_node.pc, Child(True, start_node.pr, start_node.pc, ary, parent=None)))
+    fringe.append([0, 0, Child(True, start_node.pr, start_node.pc, ary, parent=None)])
 
     # Initialize a 3D visited matrix (height x width x 3), the 3 channels:
     # 0: visit count, 1: first visited, 2: last visited
@@ -351,14 +364,17 @@ def A_star(sp, ep, ary, mode):
     solution = False
     path = []
 
-    # A* Loop
+    # BFS Loop
     visitno = 2  # Starting from the 2nd visit time for subsequent visits
     destination_found = False  # Flag to track if the destination has been found
 
     while fringe:
-        # Pop the node with the smallest f(n)
-        f, g, pr, pc, curr_child = heapq.heappop(fringe)
-        currNode = Node(True, pr, pc, ary)
+        
+        fringe.sort()
+        print(fringe)
+        curr_set = fringe.pop(0)  # Get the first child from the fringe
+        curr_child = curr_set[2]
+        currNode = Node(True, curr_child.pr, curr_child.pc, ary)
 
         # If we've reached the end point, backtrack the path
         for i in range(len(currNode.children)):
@@ -380,6 +396,7 @@ def A_star(sp, ep, ary, mode):
                 break  # Immediately stop further exploration after finding the destination
 
         # Append children to fringe
+        pos = 1
         for child in currNode.children:
             if child.isreal and ary[child.pr][child.pc] != 'X':
                 # Increment the visit count for the node
@@ -387,16 +404,21 @@ def A_star(sp, ep, ary, mode):
                     # If not visited yet, mark it as visited
                     visited[child.pr, child.pc, 0] = 1
                     visited[child.pr, child.pc, 1] = visitno  # First visit time
-
-                    # Compute g(n), h(n) and f(n) for the child node
-                    g_child = g + 1  # The g(n) for the child is g(n) + 1 (assuming all moves have cost 1)
-                    h_child = manhattan_heuristic(child.pr, child.pc, ep)  # h(n) for the child
-                    f_child = g_child + h_child  # f(n) = g(n) + h(n)
-
-                    # Push the child onto the fringe
-                    heapq.heappush(fringe, (f_child, g_child, child.pr, child.pc, Child(True, child.pr, child.pc, ary, parent=curr_child)))
+                    visited[child.pr, child.pc, 2] = visitno
+                    #find cost
+                    if child.value <= currNode.value:
+                        child.cumulate(1, curr_set[0])
+                    else:
+                        child.cumulate((int(child.value)-int(currNode.value) +1), curr_set[0])
+                    #find if up, down, lef, right
+                    fringe.append([child.cumcost, child.gh(end_node), Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                else:
+                    # If already visited, increment the visit count and update last visit time
+                    visited[child.pr, child.pc, 0] += 1
+                    visited[child.pr, child.pc, 2] = visitno  # Last visit time
 
                 visitno += 1  # Increment visit time
+            pos += 1
 
         # Break if we already found the solution
         if solution:
