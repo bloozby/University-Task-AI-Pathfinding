@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import re
 import heapq
+import math
 
 STUDENT_ID='a1821415'
 DEGREE = 'UG'
@@ -126,7 +127,7 @@ class Child:
         if heuristic == "manhattan":
             self.H = manhattan(self.pr, self.pc, ep.pr, ep.pc)
         else:
-            self.H = 0
+            self.H = euclidean(self.pr, self.pc, ep.pr, ep.pc)
         
 
 class Node:
@@ -344,6 +345,10 @@ def manhattan(pr, pc, er, ec):
     """Calculate the Manhattan Distance heuristic from (pr, pc) to the end point (ep)."""
     return abs(pr - er) + abs(pc - ec)
 
+def euclidean(pr, pc, er, ec):
+    """Calculate the Euclidean Distance heuristic from (pr, pc) to the end point (er, ec)."""
+    return math.sqrt((pr - er) ** 2 + (pc - ec) ** 2)
+
 def A_star(sp, ep, ary, mode, heuristic):
     sp[:] = sp[::-1]
     ep[:] = ep[::-1]
@@ -411,11 +416,12 @@ def A_star(sp, ep, ary, mode, heuristic):
                     #find cost
                     if child.value <= currNode.value:
                         child.cumulate(1, int(curr_child.cumcost))
+                        child.gh(end_node, heuristic)
                     else:
                         child.cumulate((int(child.value)-int(currNode.value) +1),int(curr_child.cumcost))
                         child.gh(end_node, heuristic)
                     #find if up, down, lef, right
-                    fringe.append([int(child.cumcost + child.H), Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                    fringe.append([child.cumcost + child.H, Child(True, child.pr, child.pc, ary, parent=curr_child)])
                 else:
                     # If already visited, increment the visit count and update last visit time
                     visited[child.pr, child.pc, 0] += 1
