@@ -122,8 +122,11 @@ class Child:
     def cumulate(self, costs, totalcost):
         self.cumcost = totalcost + costs
 
-    def gh(self, ep):
-        self.G = manhattan(self.pr, self.pc, ep.pr, ep.pc)
+    def gh(self, ep, heuristic):
+        if heuristic == "manhattan":
+            self.H = manhattan(self.pr, self.pc, ep.pr, ep.pc)
+        else:
+            self.H = 0
         
 
 class Node:
@@ -339,20 +342,23 @@ def UCS(sp, ep, ary, mode):
 
 def manhattan(pr, pc, er, ec):
     """Calculate the Manhattan Distance heuristic from (pr, pc) to the end point (ep)."""
+    print(abs(pr - er) + abs(pc - ec))
     return abs(pr - er) + abs(pc - ec)
 
-def A_star(sp, ep, ary, mode):
+def A_star(sp, ep, ary, mode, heuristic):
     sp[:] = sp[::-1]
     ep[:] = ep[::-1]
 
     start_node = Node(True, sp[1] - 1, sp[0] - 1, ary)  # starting from (startX, startY)
-    end_node = Node(True, sp[1] - 1, sp[0] - 1, ary)
+    end_node = Node(True, ep[1] - 1, ep[0] - 1, ary)
     moveMap = np.array(ary)
     moveMap[start_node.pr, start_node.pc] = "*"  # Mark the start on the map
 
     # Initialize the fringe with the start node
     fringe = []
-    fringe.append([0, 0, Child(True, start_node.pr, start_node.pc, ary, parent=None)])
+    startchild = Child(True, start_node.pr, start_node.pc, ary, parent=None)
+    startchild.gh(end_node, heuristic)
+    fringe.append([startchild.H, startchild])
 
     # Initialize a 3D visited matrix (height x width x 3), the 3 channels:
     # 0: visit count, 1: first visited, 2: last visited
@@ -369,11 +375,9 @@ def A_star(sp, ep, ary, mode):
     destination_found = False  # Flag to track if the destination has been found
 
     while fringe:
-        
         fringe.sort()
-        print(fringe)
         curr_set = fringe.pop(0)  # Get the first child from the fringe
-        curr_child = curr_set[2]
+        curr_child = curr_set[1]
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
 
         # If we've reached the end point, backtrack the path
@@ -394,9 +398,9 @@ def A_star(sp, ep, ary, mode):
                     curr_child = curr_child.parent
                 path.reverse()  # Reverse the path to get it from start to end
                 break  # Immediately stop further exploration after finding the destination
-
+        if solution:
+            break
         # Append children to fringe
-        pos = 1
         for child in currNode.children:
             if child.isreal and ary[child.pr][child.pc] != 'X':
                 # Increment the visit count for the node
@@ -407,19 +411,18 @@ def A_star(sp, ep, ary, mode):
                     visited[child.pr, child.pc, 2] = visitno
                     #find cost
                     if child.value <= currNode.value:
-                        child.cumulate(1, curr_set[0])
+                        child.cumulate(1, int(curr_child.cumcost))
                     else:
-                        child.cumulate((int(child.value)-int(currNode.value) +1), curr_set[0])
+                        child.cumulate((int(child.value)-int(currNode.value) +1),int(curr_child.cumcost))
+                        child.gh(end_node, heuristic)
                     #find if up, down, lef, right
-                    fringe.append([child.cumcost, child.gh(end_node), Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                    fringe.append([int(child.cumcost + child.H), Child(True, child.pr, child.pc, ary, parent=curr_child)])
                 else:
                     # If already visited, increment the visit count and update last visit time
                     visited[child.pr, child.pc, 0] += 1
                     visited[child.pr, child.pc, 2] = visitno  # Last visit time
 
                 visitno += 1  # Increment visit time
-            pos += 1
-
         # Break if we already found the solution
         if solution:
             break
@@ -491,4 +494,4 @@ if __name__ == "__main__":
     elif algorithm == 'ucs':
         UCS(startPoint, endPoint, mapArray, mode)
     elif algorithm == 'astar':
-        A_star(startPoint, endPoint, mapArray, mode)
+        A_star(startPoint, endPoint, mapArray, mode, heuristic)
