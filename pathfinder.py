@@ -239,7 +239,7 @@ def UCS(sp, ep, ary, mode):
 
     # Initialize the fringe with the start node
     fringe = []
-    fringe.append([0, 0, int(start_node.pr), int(start_node.pc), Child(True, start_node.pr, start_node.pc, ary, parent=None)])
+    fringe.append([0, int(start_node.pc), int(start_node.pr), 0, Child(True, start_node.pr, start_node.pc, ary, parent=None)])
 
     # Initialize a 3D visited matrix (height x width x 3), the 3 channels:
     # 0: visit count, 1: first visited, 2: last visited
@@ -256,7 +256,9 @@ def UCS(sp, ep, ary, mode):
     destination_found = False  # Flag to track if the destination has been found
 
     while fringe:
+        
         fringe.sort()
+        print(fringe)
         curr_set = fringe.pop(0)  # Get the first child from the fringe
         curr_child = curr_set[4]
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
@@ -281,7 +283,7 @@ def UCS(sp, ep, ary, mode):
                 break  # Immediately stop further exploration after finding the destination
 
         # Append children to fringe
-        pos = 0
+        pos = 1
         for child in currNode.children:
             if child.isreal and ary[child.pr][child.pc] != 'X':
                 # Increment the visit count for the node
@@ -296,14 +298,14 @@ def UCS(sp, ep, ary, mode):
                     else:
                         child.cumulate((int(child.value)-int(currNode.value) +1), curr_set[0])
                     #find if up, down, lef, right
-                    fringe.append([child.cumcost, pos, int(child.pr), int(child.pc), Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                    fringe.append([child.cumcost, int(child.pc), int(child.pr), pos, Child(True, child.pr, child.pc, ary, parent=curr_child)])
                 else:
                     # If already visited, increment the visit count and update last visit time
                     visited[child.pr, child.pc, 0] += 1
                     visited[child.pr, child.pc, 2] = visitno  # Last visit time
 
                 visitno += 1  # Increment visit time
-                pos += 1
+            pos += 1
 
         # Break if we already found the solution
         if solution:
