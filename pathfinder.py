@@ -258,7 +258,6 @@ def UCS(sp, ep, ary, mode):
     while fringe:
         
         fringe.sort()
-        print(fringe)
         curr_set = fringe.pop(0)  # Get the first child from the fringe
         curr_child = curr_set[4]
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
