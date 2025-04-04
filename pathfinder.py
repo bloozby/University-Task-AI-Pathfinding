@@ -239,7 +239,7 @@ def UCS(sp, ep, ary, mode):
 
     # Initialize the fringe with the start node
     fringe = []
-    fringe.append([0, int(start_node.pc), int(start_node.pr), 0, Child(True, start_node.pr, start_node.pc, ary, parent=None)])
+    fringe.append([0, int(start_node.pc) + int(start_node.pr), 0, Child(True, start_node.pr, start_node.pc, ary, parent=None)])
 
     # Initialize a 3D visited matrix (height x width x 3), the 3 channels:
     # 0: visit count, 1: first visited, 2: last visited
@@ -259,7 +259,7 @@ def UCS(sp, ep, ary, mode):
         
         fringe.sort()
         curr_set = fringe.pop(0)  # Get the first child from the fringe
-        curr_child = curr_set[4]
+        curr_child = curr_set[3]
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
 
         # If we've reached the end point, backtrack the path
@@ -297,7 +297,7 @@ def UCS(sp, ep, ary, mode):
                     else:
                         child.cumulate((int(child.value)-int(currNode.value) +1), curr_set[0])
                     #find if up, down, lef, right
-                    fringe.append([child.cumcost, int(child.pc), int(child.pr), pos, Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                    fringe.append([child.cumcost, pos int(child.pc)+int(child.pc), pos, Child(True, child.pr, child.pc, ary, parent=curr_child)])
                 else:
                     # If already visited, increment the visit count and update last visit time
                     visited[child.pr, child.pc, 0] += 1
