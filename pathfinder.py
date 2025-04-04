@@ -342,7 +342,6 @@ def UCS(sp, ep, ary, mode):
 
 def manhattan(pr, pc, er, ec):
     """Calculate the Manhattan Distance heuristic from (pr, pc) to the end point (ep)."""
-    print(abs(pr - er) + abs(pc - ec))
     return abs(pr - er) + abs(pc - ec)
 
 def A_star(sp, ep, ary, mode, heuristic):
