@@ -383,7 +383,6 @@ def A_star(sp, ep, ary, mode, heuristic):
         curr_set = fringe.pop(0)  # Get the first child from the fringe
         curr_child = curr_set[1]
         currNode = Node(True, curr_child.pr, curr_child.pc, ary)
-
         # If we've reached the end point, backtrack the path
         for i in range(len(currNode.children)):
             child = currNode.children[i]
@@ -415,13 +414,15 @@ def A_star(sp, ep, ary, mode, heuristic):
                     visited[child.pr, child.pc, 2] = visitno
                     #find cost
                     if child.value <= currNode.value:
-                        child.cumulate(1, int(curr_child.cumcost))
-                        child.gh(end_node, heuristic)
+                        newchild = Child(True, child.pr, child.pc, ary, parent=curr_child)
+                        newchild.cumulate(1, int(curr_child.cumcost))
+                        newchild.gh(end_node, heuristic)
                     else:
-                        child.cumulate((int(child.value)-int(currNode.value) +1),int(curr_child.cumcost))
-                        child.gh(end_node, heuristic)
+                        newchild = Child(True, child.pr, child.pc, ary, parent=curr_child)
+                        newchild.cumulate((int(child.value)-int(currNode.value) +1),int(curr_child.cumcost))
+                        newchild.gh(end_node, heuristic)
                     #find if up, down, lef, right
-                    fringe.append([child.cumcost + child.H, Child(True, child.pr, child.pc, ary, parent=curr_child)])
+                    fringe.append([newchild.cumcost + newchild.H, newchild])
                 else:
                     # If already visited, increment the visit count and update last visit time
                     visited[child.pr, child.pc, 0] += 1
