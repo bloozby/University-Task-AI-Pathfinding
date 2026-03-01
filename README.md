@@ -134,10 +134,20 @@ python pathfinder.py [mode] [map] [algorithm] [heuristic]
 
 Example:
 
-* 1 1 1
-* X 1 1
-* * * 1
-1 1 * *
+<table border="0">
+  <tr>
+    <td>*</td><td>1</td><td>1</td><td>1</td>
+  </tr>
+  <tr>
+    <td>*</td><td>X</td><td>1</td><td>1</td>
+  </tr>
+  <tr>
+    <td>*</td><td>*</td><td>*</td><td>1</td>
+  </tr>
+  <tr>
+    <td>1</td><td>1</td><td>*</td><td>*</td>
+  </tr>
+</table>
 
 
 ### 🔹 Debug Mode
