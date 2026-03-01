@@ -1,4 +1,4 @@
-athfinder — BFS, UCS, and A* Search (Grid Maps)
+Pathfinder — BFS, UCS, and A* Search (Grid Maps)
 
 A Python command-line pathfinding tool implementing Breadth-First Search (BFS), Uniform Cost Search (UCS), and A* on a grid-based map with obstacles and terrain costs.
 
