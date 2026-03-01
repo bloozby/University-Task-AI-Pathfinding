@@ -42,6 +42,7 @@ Example layout:
   1 1 3 X 1
   1 1 1 1 1
   1 1 1 1 1
+
 Cell meanings
 
   X → obstacle (impassable)
