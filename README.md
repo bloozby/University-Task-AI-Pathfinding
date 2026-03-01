@@ -1,38 +1,36 @@
-Pathfinder — BFS, UCS, and A* Search (Grid Maps)
+# Pathfinder — BFS, UCS, and A* Search (Grid Maps)
 
-A Python command-line pathfinding tool implementing Breadth-First Search (BFS), Uniform Cost Search (UCS), and A* on a grid-based map with obstacles and terrain costs.
+A Python command-line pathfinding tool implementing **Breadth-First Search (BFS)**, **Uniform Cost Search (UCS)**, and **A\*** on a grid-based map with obstacles and terrain costs.
 
-Features
+---
 
-- BFS (unweighted shortest path in number of steps)
 
-- UCS (least-cost path using terrain-based movement costs)
+---
 
-- A* (least-cost path + heuristic guidance)
+##  Features
 
-- Supports two heuristics for A*: Manhattan and Euclidean
-
+- **BFS** (unweighted shortest path in number of steps)
+- **UCS** (least-cost path using terrain-based movement costs)
+- **A\*** (least-cost path + heuristic guidance)
+- Supports two heuristics for A\*: **Manhattan** and **Euclidean**
 - Two output modes:
+  - `release` → prints only the final path or `null`
+  - `debug` → prints the path + visit statistics matrices
 
-    release → prints only the final path or null
+---
 
-    debug → prints the path + visit statistics matrices
+## Map Format
 
-Map Format
+The program reads a plain-text map file.
 
-  The program reads a plain-text map file.
-  
-  Expected file structure
-  
-  Map size (rows, cols)
-  
-  Start point (x, y)
-  
-  End point (x, y)
-  
-  Grid rows of cells (X for obstacle, digits for terrain)
+### Expected File Structure
 
-Example layout:
+1. Map size (rows cols)
+2. Start point (x y)
+3. End point (x y)
+4. Grid rows of cells (`X` for obstacle, digits for terrain)
+
+### Example
 
   5 5
   1 1
@@ -43,70 +41,82 @@ Example layout:
   1 1 1 1 1
   1 1 1 1 1
 
-Cell meanings
+### Cell Meanings
 
-  X → obstacle (impassable)
-  
-  0–9... → terrain value (affects cost in UCS/A*)
+- `X` → obstacle (impassable)
+- `0–9...` → terrain value (affects movement cost in UCS and A*)
 
-Algorithms
-BFS (bfs)
+---
 
-  Explores level-by-level (FIFO queue).
-  
-  Finds the path with the fewest steps (ignores terrain costs).
+##  Algorithms Implemented
 
-UCS (ucs)
+###  BFS (`bfs`)
+- Explores nodes level-by-level (FIFO queue).
+- Finds the path with the **fewest steps**.
+- Ignores terrain costs.
 
-  Explores the node with the lowest cumulative path cost first.
-  
-  Movement cost rule used in this implementation:
-  
-  If moving to an equal/lower value cell: cost = 1
-  
-  If moving to a higher value cell: cost = (height_difference + 1)
+---
 
-A* (astar)
+###  UCS (`ucs`)
+- Expands the node with the **lowest cumulative path cost**.
+- Movement cost rule:
+  - If moving to an equal or lower value cell → cost = `1`
+  - If moving to a higher value cell → cost = `(height_difference + 1)`
 
-  Uses UCS cost + heuristic estimate:
-  
+Finds the true least-cost path.
+
+---
+
+###  A* (`astar`)
+- Combines UCS cost and heuristic:
     f(n) = g(n) + h(n)
   
-  Heuristic options:
-  
-    manhattan → |dx| + |dy|
-    
-    euclidean → sqrt(dx² + dy²)
 
- Usage
+- Supported heuristics:
+- `manhattan` → `|dx| + |dy|`
+- `euclidean` → `sqrt(dx² + dy²)`
+
+Heuristic guides search toward the goal to improve efficiency.
+
+---
+
+## ⚙️ Usage
 
 Run with:
 
 python pathfinder.py [mode] [map] [algorithm] [heuristic]
 
-Arguments
-  Argument	Options	Notes
-  mode	debug or release	Controls output verbosity
-  map	path to .txt map file	Required
-  algorithm	bfs, ucs, astar	Required
-  heuristic	manhattan, euclidean	Only used when algorithm=astar
+### Arguments
 
-Examples
-BFS (release)
+| Argument | Options | Notes |
+|----------|----------|-------|
+| `mode` | `debug` or `release` | Controls output verbosity |
+| `map` | Path to `.txt` map file | Required |
+| `algorithm` | `bfs`, `ucs`, `astar` | Required |
+| `heuristic` | `manhattan`, `euclidean` | Only used when `algorithm=astar` |
+
+---
+
+## ✅ Example Commands
+
+### BFS (Release Mode)
   python pathfinder.py release maps/map1.txt bfs
-UCS (debug)
+
+### UCS (Debug Mode)
   python pathfinder.py debug maps/map1.txt ucs
-A* with Manhattan heuristic
+### A* with Manhattan Heuristic
   python pathfinder.py release maps/map1.txt astar manhattan
-A* with Euclidean heuristic (debug)
+### A* with Manhattan Heuristic
   python pathfinder.py debug maps/map1.txt astar euclidean
 
-Output Format
-Release Mode
+---
 
-  If a solution exists: prints the map with * marking the path
-  
-  If no solution exists: prints null
+## 📤 Output Format
+
+### 🔹 Release Mode
+
+- If a solution exists → prints the map with `*` marking the path
+- If no solution exists → prints:
 
 Example:
 
@@ -116,35 +126,40 @@ Example:
 1 1 * *
 
 
-Debug Mode
+### 🔹 Debug Mode
 
-If a solution exists, prints:
+Prints:
 
-path: → map with *
+1. `path:` → map with `*`
+2. `#visits:` → visit count per cell
+3. `first visits:` → first visit timestamp per cell
+4. `last visits:` → last visit timestamp per cell
 
-#visits: → visit count per cell
-
-first visits: → visit order when a cell was first discovered
-
-last visits: → last time a cell was considered/updated
-
-If no solution exists, prints:
+If no solution exists:
 
 path: null
 
 ... placeholders for visit tables (matching spec expectations)
 
-Implementation Notes
+---
 
-Coordinates from the file are read as (x, y) but internally converted for row/column indexing.
+##  Implementation Details
 
-Neighbours are expanded in fixed order:
+- Coordinates from input file are converted for internal row/column indexing.
+- Neighbours are expanded in this order:
+  - Up
+  - Down
+  - Left
+  - Right
+- Obstacles (`X`) are never expanded.
+- Path reconstruction uses parent references stored in child nodes.
+- A 3D `visited` matrix tracks:
+  - Visit count
+  - First visit time
+  - Last visit time
 
-Up, Down, Left, Right
+---
 
-Obstacles (X) are never expanded.
+##  File Structure
 
-Path reconstruction is done via parent pointers stored in Child objects.
-
- Files
 pathfinder.py   # Implementation (BFS, UCS, A*, parsing, output formatting)
